@@ -13,7 +13,7 @@ class _HomePageState extends State<HomePage> {
   String _search;
 
   ///Número de buscas incrementais
-  int _offSet = 0;
+  int _offSet = 75;
 
   /**
    * _getGif busca no site giphy.com as melhores gifs do momento e também
@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
 
     if (_search = null)
       response = await http.get(
-          'https://api.giphy.com/v1/gifs/trending?api_key=9LFHhLElFlO17yDG0B6hTLzKXa0t99yG&limit=25&rating=G');
+          'https://api.giphy.com/v1/gifs/trending?api_key=9LFHhLElFlO17yDG0B6hTLzKXa0t99yG&limit=20&rating=G');
     else
       response = await http.get(
           'https://api.giphy.com/v1/gifs/search?api_key=9LFHhLElFlO17yDG0B6hTLzKXa0t99yG&q=$_search&limit=20&offset=$_offSet&rating=G&lang=pt');
@@ -76,8 +76,8 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             child: FutureBuilder(
               future: _getGif(),
-              builder: (context, snapshot){
-                switch(snapshot.connectionState){
+              builder: (context, snapshot) {
+                switch (snapshot.connectionState) {
                   case ConnectionState.waiting:
                   case ConnectionState.none:
                     return Container(
@@ -87,11 +87,13 @@ class _HomePageState extends State<HomePage> {
                       child: CircularProgressIndicator(
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                         strokeWidth: 5.0,
-                      ),//CircularProgressIndicator
-                    );//Container
+                      ), //CircularProgressIndicator
+                    ); //Container
                   default:
-                    if (snapshot.hasError) return Container();
-                    else _createGifTable(context, snapshot);
+                    if (snapshot.hasError)
+                      return Container();
+                    else
+                      _createGifTable(context, snapshot);
                 }
               },
             ), //FutureBuilder
@@ -101,8 +103,25 @@ class _HomePageState extends State<HomePage> {
     ); //Scaffold
   }
 
-  Widget _createGifTable(BuildContext context, AsyncSnapshot snapshot){
-
+  Widget _createGifTable(BuildContext context, AsyncSnapshot snapshot) {
+    return GridView.builder(
+      padding: EdgeInsets.all(10.0),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 10.0,
+        mainAxisSpacing: 10.0,
+      ), //SliverGridDelegateWithFixedCrossAxisCount
+      itemCount: snapshot.data['data'].lenght,
+      itemBuilder: (context, index){
+        print("aqui");
+        return GestureDetector(
+          child: Image.network(
+            snapshot.data['data'][index]['images']['fixed_height']['url'],
+            height: 300.0,
+            fit: BoxFit.cover,
+          ),//Image
+        ); //GestureDetector
+      }, //itemBuilder
+    ); //GridView
   }
-
 }
