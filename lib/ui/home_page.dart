@@ -10,7 +10,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   ///Pesquisa o conteúdo desta variável
-  String _search;
+  String _search ;
 
   ///Número de buscas incrementais
   int _offSet = 75;
@@ -22,13 +22,13 @@ class _HomePageState extends State<HomePage> {
   Future<Map> _getGif() async {
     http.Response response;
 
-    if (_search = null)
+    if (_search == null) {
       response = await http.get(
           'https://api.giphy.com/v1/gifs/trending?api_key=9LFHhLElFlO17yDG0B6hTLzKXa0t99yG&limit=20&rating=G');
-    else
+    }else{
       response = await http.get(
           'https://api.giphy.com/v1/gifs/search?api_key=9LFHhLElFlO17yDG0B6hTLzKXa0t99yG&q=$_search&limit=20&offset=$_offSet&rating=G&lang=pt');
-
+    }
     return json.decode(response.body);
   }
 
@@ -68,9 +68,13 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18.0,
-              ),
-              //TextStyle
+              ),//TextStyle
               textAlign: TextAlign.center,
+              onSubmitted: (text){
+                setState(() {
+                  _search = text;
+                });
+              },
             ), //TextField,
           ), //Padding
           Expanded(
@@ -93,7 +97,7 @@ class _HomePageState extends State<HomePage> {
                     if (snapshot.hasError)
                       return Container();
                     else
-                      _createGifTable(context, snapshot);
+                      return _createGifTable(context, snapshot);
                 }
               },
             ), //FutureBuilder
@@ -111,17 +115,15 @@ class _HomePageState extends State<HomePage> {
         crossAxisSpacing: 10.0,
         mainAxisSpacing: 10.0,
       ), //SliverGridDelegateWithFixedCrossAxisCount
-      itemCount: snapshot.data['data'].lenght,
+      itemCount: snapshot.data['data'].length,
       itemBuilder: (context, index){
-        print("aqui");
         return GestureDetector(
-          child: Image.network(
-            snapshot.data['data'][index]['images']['fixed_height']['url'],
+          child: Image.network(snapshot.data['data'][index]['images']['fixed_height']['url'],
             height: 300.0,
             fit: BoxFit.cover,
           ),//Image
         ); //GestureDetector
-      }, //itemBuilder
+      } //itemBuilder
     ); //GridView
   }
 }
