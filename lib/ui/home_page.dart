@@ -10,10 +10,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   ///Pesquisa o conteúdo desta variável
-  String _search ;
+  String _search;
 
-  ///Número de buscas incrementais
-  int _offSet = 75;
+  ///Número de buscas incrementais (quantidade de icones para a proxima pagina
+  int _offSet = 0;
 
   /**
    * _getGif busca no site giphy.com as melhores gifs do momento e também
@@ -25,9 +25,9 @@ class _HomePageState extends State<HomePage> {
     if (_search == null) {
       response = await http.get(
           'https://api.giphy.com/v1/gifs/trending?api_key=9LFHhLElFlO17yDG0B6hTLzKXa0t99yG&limit=20&rating=G');
-    }else{
+    } else {
       response = await http.get(
-          'https://api.giphy.com/v1/gifs/search?api_key=9LFHhLElFlO17yDG0B6hTLzKXa0t99yG&q=$_search&limit=20&offset=$_offSet&rating=G&lang=pt');
+          'https://api.giphy.com/v1/gifs/search?api_key=9LFHhLElFlO17yDG0B6hTLzKXa0t99yG&q=$_search&limit=19&offset=$_offSet&rating=G&lang=pt');
     }
     return json.decode(response.body);
   }
@@ -68,11 +68,12 @@ class _HomePageState extends State<HomePage> {
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18.0,
-              ),//TextStyle
+              ), //TextStyle
               textAlign: TextAlign.center,
-              onSubmitted: (text){
+              onSubmitted: (text) {
                 setState(() {
                   _search = text;
+                  _offSet = 0;
                 });
               },
             ), //TextField,
@@ -107,23 +108,60 @@ class _HomePageState extends State<HomePage> {
     ); //Scaffold
   }
 
+  int _getCount(List data) {
+    if (_search == null) {
+      return data.length;
+    } else {
+      return data.length + 1;
+    }
+  }
+
   Widget _createGifTable(BuildContext context, AsyncSnapshot snapshot) {
     return GridView.builder(
-      padding: EdgeInsets.all(10.0),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 10.0,
-        mainAxisSpacing: 10.0,
-      ), //SliverGridDelegateWithFixedCrossAxisCount
-      itemCount: snapshot.data['data'].length,
-      itemBuilder: (context, index){
-        return GestureDetector(
-          child: Image.network(snapshot.data['data'][index]['images']['fixed_height']['url'],
-            height: 300.0,
-            fit: BoxFit.cover,
-          ),//Image
-        ); //GestureDetector
-      } //itemBuilder
-    ); //GridView
+        padding: EdgeInsets.all(10.0),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 10.0,
+          mainAxisSpacing: 10.0,
+        ), //SliverGridDelegateWithFixedCrossAxisCount
+        itemCount: _getCount(snapshot.data['data']),
+        itemBuilder: (context, index) {
+          if (_search == null || index < snapshot.data['data'].length)
+            return GestureDetector(
+              child: Image.network(
+                snapshot.data['data'][index]['images']['fixed_height']['url'],
+                height: 300.0,
+                fit: BoxFit.cover,
+              ), //Image
+            ); //GestureDetector
+          else
+            return Container(
+              child: GestureDetector(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(
+                      Icons.add,
+                      color: Colors.white,
+                      size: 70.0,
+                    ), //Icon
+                    Text(
+                      "Carregar mais...",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 22.0,
+                      ), //TextStyle
+                    ), //Text
+                  ], //Widget
+                ), //Column
+                onTap: (){
+                  setState(() {
+                    _offSet += 19;
+                  });//setState
+                },//onTap
+              ), //GestureDetector
+            ); //Container
+        } //itemBuilder
+        ); //GridView
   }
 }
